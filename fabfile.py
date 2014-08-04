@@ -6,8 +6,8 @@ env.hosts = ['server.domain.ru']  # Сервер
 env.user = 'user'  # Пользователь
 env.password = 'password'  # Пароль
 env.cwd = '/service/'  # Домашняя директория
-preCommand = '/usr/bin/uptime'  # Команда выполняемая перед заменой файлов
-postCommand = '/bin/hostname'  # Команда выполняемая после заменой файлов
+preCommand = 'service example stop'  # Команда выполняемая перед заменой файлов
+postCommand = 'service example start'  # Команда выполняемая после замены файлов
 newFolder = 'new'  # Локальная папка с новыми файлами
 bupFolder = 'bup'  # Локальная папка для бэкапов с удаленного сервера
 
