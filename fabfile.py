@@ -2,7 +2,7 @@
 import os
 from fabric.api import *
 from fabric.contrib.files import exists
-env.hosts = ['s-kh-fs1.msk.csat.ru']
+env.hosts = ['server.domain.ru']  # Сервер
 env.user = 'user'  # Пользователь
 env.password = 'password'  # Пароль
 env.cwd = '/service/'  # Домашняя директория
