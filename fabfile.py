@@ -3,16 +3,16 @@ import os
 from fabric.api import *
 from fabric.contrib.files import exists
 env.hosts = ['s-kh-fs1.msk.csat.ru']
-env.user = 'shulgin'
-env.password = 'Gbnth88'
-env.cwd = '/service/'
-preCommand = '/usr/bin/uptime'
-postCommand = '/bin/hostname'
-newFolder = 'new'
-bupFolder = 'bup'
+env.user = 'user'  # Пользователь
+env.password = 'password'  # Пароль
+env.cwd = '/service/'  # Домашняя директория
+preCommand = '/usr/bin/uptime'  # Команда выполняемая перед заменой файлов
+postCommand = '/bin/hostname'  # Команда выполняемая после заменой файлов
+newFolder = 'new'  # Локальная папка с новыми файлами
+bupFolder = 'bup'  # Локальная папка для бэкапов с удаленного сервера
 
 
-def mkdir_p(path):  # Создает директории
+def mkdir_p(path):  # Создает директории на удаленной машине
     run('mkdir -p ' + path)
 
 
