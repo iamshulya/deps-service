@@ -31,7 +31,7 @@ def listdir(path):  # Выдает список файлов/директори�
 
 
 def do():
-    #run(preCommand)
+    run(preCommand)
     rFileList = listdir(newFolder)
     for rFile in rFileList:
         head, tail = os.path.split(env.cwd + rFile[len(newFolder) + 1:])
@@ -43,19 +43,23 @@ def do():
         if not exists(head):
             mkdir_p(head)
         put(rFile, rFile[len(newFolder) + 1:])
-            #print(headBup)
-
-    #run(postCommand)
+    run(postCommand)
 
 
-def check_file(path):
-    if exists(path):
-        print("Exists!")
-    else:
-        print("Not exists!")
+def undo():
+    run(preCommand)
+    rFileList = listdir(bupFolder)
+    rFileListNew = listdir(newFolder)
+    for rFileNew in rFileListNew:  # Удалить файлы кот. есть в папке new на удаленной машине
+        run('rm -f ' + rFileNew[len(newFolder) + 1:])
+    for rFile in rFileList:
+        head, tail = os.path.split(env.cwd + rFile[len(bupFolder) + 1:])
+        if not exists(head):
+            mkdir_p(head)
+        put(rFile, rFile[len(bupFolder) + 1:])
+    run(postCommand)
 
 
-def preDeploy(preCommand='/usr/bin/uptime'):
-    sudo(preCommand)
+
 
 
