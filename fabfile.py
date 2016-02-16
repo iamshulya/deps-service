@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
+from menu import *
 from fabric.api import *
 from fabric.contrib.files import exists
-env.hosts = ['server.domain.ru']  # Сервер
-env.user = 'user'  # Пользователь
-env.password = 'password'  # Пароль
-env.cwd = '/service/'  # Домашняя директория
-preCommand = 'service example stop'  # Команда выполняемая перед заменой файлов
-postCommand = 'service example start'  # Команда выполняемая после замены файлов
-newFolder = 'new'  # Локальная папка с новыми файлами
-bupFolder = 'bup'  # Локальная папка для бэкапов с удаленного сервера
-
+from os.path import join
+preCommand = '/etc/init.d/jetty stop'  # Команда выполняемая перед заменой файлов
+postCommand = '/etc/init.d/jetty start'  # Команда выполняемая после замены файлов
+service_root = '/service'
+local_releases_root = 'releases'
+env.user = 'deps'  # Пользователь
+env.key_filename = './id_rsa'
 
 def mkdir_p(path):  # Создает директории на удаленной машине
     run('mkdir -p ' + path)
@@ -29,37 +28,39 @@ def listdir(path):  # Выдает список файлов/директори�
             dirnames.remove('.git')
     return(pathToFiles)
 
+def remEmptyDir(path): # Удаляет пустые директории
+    for root, dirs, files in os.walk(path,topdown=False):
+        for name in dirs:
+            fname = join(root,name)
+            if not os.listdir(fname): #to check wither the dir is empty
+                #print fname
+                os.removedirs(fname)
+def f(s): # Тестовая функция дл вывода в консоль.
+    print s
 
-def do():
-    run(preCommand)
-    rFileList = listdir(newFolder)
-    for rFile in rFileList:
-        head, tail = os.path.split(env.cwd + rFile[len(newFolder) + 1:])
-        headBup, tailBup = os.path.split(bupFolder + "/" + rFile[len(newFolder) + 1:])
-        if exists(rFile[len(newFolder) + 1:]):
-            if not os.path.isdir(headBup):
-                mkdir_p_local(headBup)
-            get(rFile[len(newFolder) + 1:], headBup)
-        if not exists(head):
-            mkdir_p(head)
-        put(rFile, rFile[len(newFolder) + 1:])
-    run(postCommand)
+@task(name='web-do')
+def upload_to_server(release):
+    """#### Example: fab upload_to_server:release=20150725T115311 ####"""
+    run('mkdir -p /var/local/releases')
+    put('releases/%s/' % release, '/var/local/releases', mode=0775)
+    run('chown -R deps:adm /var/local/releases')
+    sudo(preCommand, shell=False)
+    run('find ' + service_root + ' -type l | xargs -i unlink {}')
+    run('find /var/local/releases/%s/ -mindepth 1 -depth -type d -printf "%%P\\n" | while read dir; do mkdir -p %s/$dir; done' % (release, service_root), shell=False)
+    run('find /var/local/releases/%s/ -type f -printf "%%P\\n" | while read file; do ln -sf /var/local/releases/%s/$file %s/$file; done' % (release, release, service_root))
+    sudo(postCommand, shell=False)
+    with cd('/var/local/releases'):
+        run('rm -fr `ls -t | tail -n +2`')
 
-
-def undo():
-    run(preCommand)
-    rFileList = listdir(bupFolder)
-    rFileListNew = listdir(newFolder)
-    for rFileNew in rFileListNew:  # Удалить файлы кот. есть в папке new на удаленной машине
-        run('rm -f ' + rFileNew[len(newFolder) + 1:])
-    for rFile in rFileList:
-        head, tail = os.path.split(env.cwd + rFile[len(bupFolder) + 1:])
-        if not exists(head):
-            mkdir_p(head)
-        put(rFile, rFile[len(bupFolder) + 1:])
-    run(postCommand)
-
-
-
-
-
+@task(name='do')
+def choose_release():
+    """- Example: fab do -H server-hostname-or-ip-address"""
+    remEmptyDir('releases')
+    sorted_release_folder = os.listdir(local_releases_root)
+    sorted_release_folder.sort()
+    sorted_release_folder.reverse()
+    m = Menu("########## Выбирите релиз ##########")
+    for release_folder in sorted_release_folder:
+        if os.path.isdir(os.path.join(local_releases_root,release_folder)):
+            m.addoption(release_folder, lambda a=release_folder:upload_to_server(a))
+    m.start()
