@@ -4,12 +4,6 @@ from menu import *
 from fabric.api import *
 from fabric.contrib.files import exists
 from os.path import join
-preCommand = '/etc/init.d/jetty stop'  # Команда выполняемая перед заменой файлов
-postCommand = '/etc/init.d/jetty start'  # Команда выполняемая после замены файлов
-service_root = '/service'
-local_releases_root = 'releases'
-env.user = 'deps'  # Пользователь
-env.key_filename = './id_rsa'
 
 def mkdir_p(path):  # Создает директории на удаленной машине
     run('mkdir -p ' + path)
@@ -37,6 +31,10 @@ def remEmptyDir(path): # Удаляет пустые директории
                 os.removedirs(fname)
 def f(s): # Тестовая функция дл вывода в консоль.
     print s
+
+@task()
+def test_rc():
+    print(local_releases_root)
 
 @task(name='web-do')
 def upload_to_server(release):
