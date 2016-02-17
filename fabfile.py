@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from config import *
 import os
 from menu import *
 from fabric.api import *
@@ -34,7 +35,7 @@ def f(s): # Тестовая функция дл вывода в консоль.
 
 @task()
 def test_rc():
-    print(local_releases_root)
+    print(env.user)
 
 @task(name='web-do')
 def upload_to_server(release):

@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from fabric.api import *
+
 preCommand = '/etc/init.d/jetty stop'
 postCommand = '/etc/init.d/jetty start'
 service_root = '/service'
