@@ -30,11 +30,11 @@ def remEmptyDir(path): # Удаляет пустые директории
             if not os.listdir(fname): #to check wither the dir is empty
                 #print fname
                 os.removedirs(fname)
-def f(s): # Тестовая функция дл вывода в консоль.
+def f(s): # Тестовая функция для вывода в консоль.
     print s
 
 @task()
-def test_rc():
+def test_rc(): # Тестовая функция
     print(remote_releases_root)
 
 @task(name='web-do')
@@ -48,7 +48,7 @@ def upload_to_server(release):
     run('find %s/%s/%s -mindepth 1 -depth -type d -printf "%%P\\n" | while read dir; do mkdir -p %s/$dir; done' % (remote_releases_root, service_name, release, service_root), shell=False)
     run('find %s/%s/%s -type f -printf "%%P\\n" | while read file; do ln -sf /var/local/releases/%s/%s/$file %s/$file; done' % (remote_releases_root, service_name, release, service_name, release,  service_root))
     sudo(postCommand, shell=False)
-    with cd('%s' % remote_releases_root):
+    with cd('%s/%s' % (remote_releases_root, service_name)):
         run('rm -fr `ls -t | tail -n +2`')
 
 @task(name='do')
