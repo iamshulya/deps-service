@@ -49,7 +49,7 @@ def upload_to_server(release):
     run('find %s/%s/%s -type f -printf "%%P\\n" | while read file; do ln -sf /var/local/releases/%s/%s/$file %s/$file; done' % (remote_releases_root, service_name, release, service_name, release,  service_root))
     sudo(postCommand, shell=False)
     with cd('%s/%s' % (remote_releases_root, service_name)):
-        run('rm -fr `ls -t | tail -n +2`')
+        run('rm -rf `ls -t | tail -n +2`')
 
 @task(name='do')
 def choose_release():
