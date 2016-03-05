@@ -34,8 +34,8 @@ def f(s): # Тестовая функция для вывода в консол�
     print s
 
 @task()
-def test_rc(): # Тестовая функция
-    print(remote_releases_root)
+def check_release_version(): # Проверка версии сервиса на удаленном сервере
+    run('ls %s/%s' % (remote_releases_root, service_name))
 
 @task(name='web-do')
 def upload_to_server(release):
@@ -44,13 +44,12 @@ def upload_to_server(release):
     put('releases/%s/' % release, '%s/%s' % (remote_releases_root, service_name), mode=0775)
     run('chown -R deps:adm %s/%s' % (remote_releases_root, service_name))
     sudo(preCommand, shell=False)
-#    run('find ' + service_root + ' -type l | xargs -i unlink {}')
     run('find %s -type l | while read file; do if [[ `readlink $file` == *"%s"* ]]; then `unlink $file`; fi; done' % (service_root, service_name), shell=False)
     run('find %s/%s/%s -mindepth 1 -depth -type d -printf "%%P\\n" | while read dir; do mkdir -p %s/$dir; done' % (remote_releases_root, service_name, release, service_root), shell=False)
     run('find %s/%s/%s -type f -printf "%%P\\n" | while read file; do ln -sf /var/local/releases/%s/%s/$file %s/$file; done' % (remote_releases_root, service_name, release, service_name, release,  service_root))
-    sudo(postCommand, shell=False)
     with cd('%s/%s' % (remote_releases_root, service_name)):
         run('rm -rf `ls -t | tail -n +2`')
+    sudo(postCommand, shell=False)
 
 @task(name='do')
 def choose_release():
