@@ -35,7 +35,8 @@ def f(s): # Тестовая функция для вывода в консол�
 
 @task()
 def check_release_version(): # Проверка версии сервиса на удаленном сервере
-    run('ls %s/%s' % (remote_releases_root, service_name))
+    run('ls %s/%s > /tmp/.lastrelease' % (remote_releases_root, service_name))
+    get('/tmp/.lastrelease', './.lastrelease')
 
 @task(name='web-do')
 def upload_to_server(release):
