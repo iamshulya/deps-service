@@ -35,8 +35,11 @@ def f(s): # Тестовая функция для вывода в консол�
 
 @task()
 def check_release_version(): # Проверка версии сервиса на удаленном сервере
-    run('ls %s/%s > /tmp/.lastrelease' % (remote_releases_root, service_name))
-    get('/tmp/.lastrelease', './.lastrelease')
+    with warn_only():
+        run('ls %s/%s > /tmp/.lastrelease' % (remote_releases_root, service_name))
+        run('if [ `find /tmp/.lastrelease -size 0`  ]; then `echo NO SUCH SERVICE > /tmp/.lastrelease`;fi')
+        get('/tmp/.lastrelease', '/tmp/.lastrelease')
+    local('cat /tmp/.lastrelease >> ./.lastrelease')
 
 @task(name='web-do')
 def upload_to_server(release):
